@@ -13,38 +13,32 @@ const showModal = ref(false);
 const selectedProject = ref(null);
 const projectToDelete = ref(null);
 
-onMounted(() => {
+onMounted(() =>{
   projectStore.loadProjects();
 });
-
-onUnmounted(() => {
+onUnmounted(() =>{
   projectStore.cleanup();
 });
-
-const openCreateModal = () => {
+const openCreateModal= () =>{
   selectedProject.value = null;
   showModal.value = true;
 };
-
-const openEditModal = (project) => {
+const openEditModal = (project) =>{
   selectedProject.value = project;
   showModal.value = true;
 };
-
-const closeModal = () => {
+const closeModal = () =>{
   showModal.value = false;
   selectedProject.value = null;
 };
 
-const confirmDelete = (project) => {
+const confirmDelete = (project) =>{
   projectToDelete.value = project;
 };
-
-const cancelDelete = () => {
+const cancelDelete = () =>{
   projectToDelete.value = null;
 };
-
-const deleteProject = async () => {
+const deleteProject = async () =>{
   if (!projectToDelete.value) return;
   
   try {
@@ -81,8 +75,7 @@ const getInitials = (name) => {
           Bienvenue {{ authStore.user?.displayName || authStore.user?.email }}
         </p>
       </div>
-
-      <!-- Actions -->
+      <!--action-->
       <div class="mb-8">
         <button
           @click="openCreateModal"
@@ -94,19 +87,17 @@ const getInitials = (name) => {
           Nouveau Projet
         </button>
       </div>
-
-      <!-- Loading -->
+      <!-- loading-->
       <div v-if="projectStore.loading && projectStore.projects.length === 0" class="text-center py-12">
         <div class="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
         <p class="text-gray-600">Chargement des projets...</p>
       </div>
 
-      <!-- Error -->
+      <!-- Erreurr -->
       <div v-else-if="projectStore.error" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
         <p class="text-red-600">{{ projectStore.error }}</p>
       </div>
 
-      <!-- Empty State -->
       <div v-else-if="projectStore.projects.length === 0" class="text-center py-12">
         <div class="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
           <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -125,8 +116,7 @@ const getInitials = (name) => {
           Créer un projet
         </button>
       </div>
-
-      <!-- Projects Grid -->
+      <!--projet section>
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div
           v-for="project in projectStore.projects"
@@ -134,14 +124,13 @@ const getInitials = (name) => {
           class="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer transform hover:-translate-y-1"
           @click="goToProject(project.id)"
         >
-          <!-- Color Header -->
           <div 
             :style="{ backgroundColor: project.color }"
             class="h-2"
           ></div>
 
           <div class="p-6">
-            <!-- Project Icon & Title -->
+            <!--titre de projet -->
             <div class="flex items-start justify-between mb-4">
               <div class="flex items-center gap-3">
                 <div 
@@ -157,13 +146,11 @@ const getInitials = (name) => {
                 </div>
               </div>
             </div>
-
-            <!-- Description -->
+            <!-- description -->
             <p class="text-gray-600 text-sm mb-4 line-clamp-2 min-h-[2.5rem]">
               {{ project.description || 'Aucune description' }}
             </p>
-
-            <!-- Actions -->
+            <!--actions-->
             <div class="flex items-center justify-between pt-4 border-t border-gray-100">
               <button
                 @click.stop="openEditModal(project)"

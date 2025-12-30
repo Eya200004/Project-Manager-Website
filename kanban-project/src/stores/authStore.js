@@ -1,19 +1,19 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import {ref} from 'vue';
 import { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
   onAuthStateChanged 
-} from 'firebase/auth';
+}
+from 'firebase/auth';
 import { auth, googleProvider } from '@/firebase/config';
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null);
   const loading = ref(true);
   const error = ref(null);
-
-  // Initialisation - Observer les changements d'état d'authentification
+  // Initialisation 
   const initAuth = () => {
     onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
@@ -32,7 +32,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Inscription avec Email/Password
   const register = async (email, password) => {
-    try {
+    try{
       error.value = null;
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       return userCredential.user;

@@ -23,21 +23,18 @@ const toggleMode = () => {
 };
 
 const validateForm = () => {
-  if (!email.value || !password.value) {
+  if (!email.value || !password.value){
     localError.value = 'Veuillez remplir tous les champs';
     return false;
   }
-
-  if (!isLoginMode.value && password.value !== confirmPassword.value) {
+  if (!isLoginMode.value && password.value !== confirmPassword.value){
     localError.value = 'Les mots de passe ne correspondent pas';
     return false;
   }
-
-  if (password.value.length < 6) {
+  if (password.value.length < 6){
     localError.value = 'Le mot de passe doit contenir au moins 6 caractères';
     return false;
   }
-
   return true;
 };
 
@@ -159,8 +156,6 @@ const switchText = computed(() =>
           <span v-else>Chargement...</span>
         </button>
       </form>
-
-      <!-- Divider -->
       <div class="relative my-6">
         <div class="absolute inset-0 flex items-center">
           <div class="w-full border-t border-gray-300"></div>
@@ -169,8 +164,7 @@ const switchText = computed(() =>
           <span class="px-4 bg-white text-gray-500">Ou continuer avec</span>
         </div>
       </div>
-
-      <!-- Google Sign In -->
+      <!-- google auth -->
       <button
         @click="handleGoogleAuth"
         type="button"
@@ -185,7 +179,6 @@ const switchText = computed(() =>
         </svg>
         <span class="font-medium text-gray-700">Google</span>
       </button>
-
       <!-- Toggle Mode -->
       <div class="mt-6 text-center">
         <button

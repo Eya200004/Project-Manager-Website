@@ -1,5 +1,5 @@
-import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import {defineStore} from 'pinia';
+import {ref} from 'vue';
 import { 
   collection, 
   addDoc, 
@@ -26,8 +26,7 @@ export const useProjectStore = defineStore('project', () => {
   
   let unsubscribeProjects = null;
   let unsubscribeTasks = null;
-
-  // Charger les projets de l'utilisateur
+  //load each user project
   const loadProjects = () => {
     const authStore = useAuthStore();
     if (!authStore.user) {
@@ -49,8 +48,7 @@ export const useProjectStore = defineStore('project', () => {
           id: doc.id,
           ...doc.data()
         }));
-        
-        // Trier manuellement par date de création (du plus récent au plus ancien)
+        //Sort by date
         projects.value.sort((a, b) => {
           const dateA = a.createdAt?.toMillis() || 0;
           const dateB = b.createdAt?.toMillis() || 0;
@@ -70,8 +68,7 @@ export const useProjectStore = defineStore('project', () => {
       loading.value = false;
     }
   };
-
-  // Créer un nouveau projet
+  //createProject
   const createProject = async (projectData) => {
     const authStore = useAuthStore();
     if (!authStore.user) throw new Error('Non authentifié');
@@ -93,8 +90,7 @@ export const useProjectStore = defineStore('project', () => {
       throw err;
     }
   };
-
-  // Mettre à jour un projet
+  //updateProject
   const updateProject = async (projectId, projectData) => {
     try {
       error.value = null;
@@ -111,13 +107,11 @@ export const useProjectStore = defineStore('project', () => {
       throw err;
     }
   };
-
-  // Supprimer un projet
+  //deleteProject
   const deleteProject = async (projectId) => {
     try {
-      error.value = null;
-      
-      // Supprimer d'abord toutes les tâches du projet
+      error.value = null;   
+      //delete project task
       const tasksRef = collection(db, 'projects', projectId, 'tasks');
       const tasksSnapshot = await getDocs(tasksRef);
       
@@ -125,8 +119,7 @@ export const useProjectStore = defineStore('project', () => {
         deleteDoc(doc(db, 'projects', projectId, 'tasks', taskDoc.id))
       );
       await Promise.all(deletePromises);
-      
-      // Puis supprimer le projet
+
       await deleteDoc(doc(db, 'projects', projectId));
     } catch (err) {
       console.error('Erreur suppression projet:', err);
@@ -134,8 +127,7 @@ export const useProjectStore = defineStore('project', () => {
       throw err;
     }
   };
-
-  // Charger un projet spécifique
+  //loadSpecificProject
   const loadProject = async (projectId) => {
     try {
       error.value = null;
@@ -144,7 +136,7 @@ export const useProjectStore = defineStore('project', () => {
       const projectRef = doc(db, 'projects', projectId);
       const projectSnap = await getDoc(projectRef);
       
-      if (projectSnap.exists()) {
+      if (projectSnap.exists()){
         currentProject.value = {
           id: projectSnap.id,
           ...projectSnap.data()
@@ -162,8 +154,7 @@ export const useProjectStore = defineStore('project', () => {
     }
   };
 
-  // Charger les tâches d'un projet en temps réel
-  const loadTasks = (projectId) => {
+  const loadTasks = (projectId) =>{
     if (!projectId) {
       error.value = 'ID de projet manquant';
       return;
@@ -173,16 +164,14 @@ export const useProjectStore = defineStore('project', () => {
     error.value = null;
 
     try {
-      // Query simple sans orderBy pour éviter les problèmes d'index
       const tasksRef = collection(db, 'projects', projectId, 'tasks');
 
       unsubscribeTasks = onSnapshot(tasksRef, (snapshot) => {
-        tasks.value = snapshot.docs.map(doc => ({
+        tasks.value = snapshot.docs.map(doc =>({
           id: doc.id,
           ...doc.data()
-        }));
-        
-        // Trier manuellement par date de création (du plus récent au plus ancien)
+        }));  
+        //sort by creation date
         tasks.value.sort((a, b) => {
           const dateA = a.createdAt?.toMillis() || 0;
           const dateB = b.createdAt?.toMillis() || 0;
@@ -196,16 +185,16 @@ export const useProjectStore = defineStore('project', () => {
         error.value = 'Erreur lors du chargement des tâches: ' + err.message;
         loading.value = false;
       });
-    } catch (err) {
+    } catch (err){
       console.error('Erreur:', err);
       error.value = 'Erreur lors du chargement des tâches: ' + err.message;
       loading.value = false;
     }
   };
 
-  // Créer une nouvelle tâche
+  //createNew Task
   const createTask = async (projectId, taskData) => {
-    try {
+    try{
       error.value = null;
       const docRef = await addDoc(collection(db, 'projects', projectId, 'tasks'), {
         title: taskData.title,
@@ -222,14 +211,13 @@ export const useProjectStore = defineStore('project', () => {
       throw err;
     }
   };
-
-  // Mettre à jour une tâche
+  //UpdateTask
   const updateTask = async (projectId, taskId, taskData) => {
     try {
       error.value = null;
       const taskRef = doc(db, 'projects', projectId, 'tasks', taskId);
       
-      const updateData = {
+      const updateData ={
         updatedAt: serverTimestamp()
       };
       
@@ -239,32 +227,31 @@ export const useProjectStore = defineStore('project', () => {
       if (taskData.deadline !== undefined) updateData.deadline = taskData.deadline;
       
       await updateDoc(taskRef, updateData);
-    } catch (err) {
+    } catch (err){
       console.error('Erreur mise à jour tâche:', err);
       error.value = 'Erreur lors de la mise à jour de la tâche: ' + err.message;
       throw err;
     }
   };
 
-  // Supprimer une tâche
+  //DeleteTask
   const deleteTask = async (projectId, taskId) => {
-    try {
+    try{
       error.value = null;
       await deleteDoc(doc(db, 'projects', projectId, 'tasks', taskId));
-    } catch (err) {
+    } catch (err){
       console.error('Erreur suppression tâche:', err);
       error.value = 'Erreur lors de la suppression de la tâche: ' + err.message;
       throw err;
     }
   };
 
-  // Nettoyer les listeners
   const cleanup = () => {
-    if (unsubscribeProjects) {
+    if (unsubscribeProjects){
       unsubscribeProjects();
       unsubscribeProjects = null;
     }
-    if (unsubscribeTasks) {
+    if (unsubscribeTasks){
       unsubscribeTasks();
       unsubscribeTasks = null;
     }
@@ -272,8 +259,6 @@ export const useProjectStore = defineStore('project', () => {
     tasks.value = [];
     currentProject.value = null;
   };
-
-  // Getters
   const getTasksByStatus = (status) => {
     return tasks.value.filter(task => task.status === status);
   };

@@ -1,5 +1,5 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import { useAuthStore } from '@/stores/authStore';
+import {createRouter, createWebHistory} from 'vue-router';
+import {useAuthStore} from '@/stores/authStore';
 
 const routes = [
   {
@@ -46,8 +46,7 @@ router.beforeEach((to, from, next) => {
   } else {
     handleNavigation();
   }
-
-  function handleNavigation() {
+  function handleNavigation(){
     const requiresAuth = to.meta.requiresAuth;
     const guestOnly = to.meta.guestOnly;
     const isAuthenticated = authStore.isAuthenticated();
