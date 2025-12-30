@@ -9,7 +9,6 @@ const props = defineProps({
     default: null
   }
 });
-
 const emit = defineEmits(['close', 'success']);
 const projectStore = useProjectStore();
 
@@ -35,15 +34,15 @@ const colors = [
   { name: 'Cyan', value: '#06b6d4' }
 ];
 
-watch(() => props.show, (newVal) => {
+watch(() => props.show, (newVal) =>{
   if (newVal) {
-    if (props.project) {
-      formData.value = {
+    if (props.project){
+      formData.value ={
         name: props.project.name,
         description: props.project.description || '',
         color: props.project.color || '#6366f1'
       };
-    } else {
+    } else{
       formData.value = {
         name: '',
         description: '',
@@ -53,8 +52,7 @@ watch(() => props.show, (newVal) => {
     localError.value = '';
   }
 });
-
-const handleSubmit = async () => {
+const handleSubmit = async () =>{
   if (!formData.value.name.trim()) {
     localError.value = 'Le nom du projet est requis';
     return;
@@ -64,7 +62,7 @@ const handleSubmit = async () => {
     isLoading.value = true;
     localError.value = '';
 
-    if (props.project) {
+    if (props.project){
       await projectStore.updateProject(props.project.id, formData.value);
     } else {
       await projectStore.createProject(formData.value);
@@ -72,15 +70,15 @@ const handleSubmit = async () => {
 
     emit('success');
     emit('close');
-  } catch (error) {
+  } catch (error){
     localError.value = error.message || 'Une erreur est survenue';
-  } finally {
+  } finally{
     isLoading.value = false;
   }
 };
 
 const handleClose = () => {
-  if (!isLoading.value) {
+  if (!isLoading.value){
     emit('close');
   }
 };

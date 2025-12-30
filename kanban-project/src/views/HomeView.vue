@@ -13,10 +13,8 @@ const navigateTo = (route) => {
   }
 };
 </script>
-
 <template>
   <div class="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-    <!-- Hero Section -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
       <div class="text-center">
         <h1 class="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
@@ -55,10 +53,10 @@ const navigateTo = (route) => {
           </div>
           <h3 class="text-xl font-bold text-gray-900 mb-2">Tableau Kanban</h3>
           <p class="text-gray-600">
-            Organisez vos tâches en colonnes (À faire, En cours, Terminé) pour une vision claire de votre progression.
+            Visualisez vos tâches de manière claire et organisée pour suivre facilement l'avancement de vos projets.
+
           </p>
         </div>
-
         <div class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition">
           <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
             <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -67,10 +65,9 @@ const navigateTo = (route) => {
           </div>
           <h3 class="text-xl font-bold text-gray-900 mb-2">Temps réel</h3>
           <p class="text-gray-600">
-            Synchronisation automatique de vos données. Vos modifications apparaissent instantanément partout.
+            Toutes vos modifications sont automatiquement synchronisées et visibles immédiatement sur tous vos appareils.
           </p>
         </div>
-
         <div class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition">
           <div class="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center mb-4">
             <svg class="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -79,7 +76,7 @@ const navigateTo = (route) => {
           </div>
           <h3 class="text-xl font-bold text-gray-900 mb-2">Sécurisé</h3>
           <p class="text-gray-600">
-            Authentification sécurisée avec Firebase. Vos données sont protégées et accessibles uniquement par vous.
+            Vos informations sont stockées en toute sécurité et accessibles uniquement par vous.
           </p>
         </div>
       </div>

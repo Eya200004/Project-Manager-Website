@@ -17,13 +17,11 @@ const statusColors = {
   doing: 'bg-blue-100 text-blue-700',
   done: 'bg-green-100 text-green-700'
 };
-
-const statusLabels = {
+const statusLabels ={
   todo: 'À faire',
   doing: 'En cours',
   done: 'Terminé'
 };
-
 const isOverdue = computed(() => {
   if (!props.task.deadline) return false;
   const deadline = new Date(props.task.deadline);
@@ -40,7 +38,6 @@ const formatDate = (dateString) => {
     year: 'numeric'
   });
 };
-
 const handleEdit = () => {
   showMenu.value = false;
   emit('edit', props.task);

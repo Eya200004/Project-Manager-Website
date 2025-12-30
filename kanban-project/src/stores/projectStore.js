@@ -27,10 +27,13 @@ export const useProjectStore = defineStore('project', () => {
   let unsubscribeProjects = null;
   let unsubscribeTasks = null;
 
-  // Charger les projets de l'utilisateur en temps réel
+  // Charger les projets de l'utilisateur
   const loadProjects = () => {
     const authStore = useAuthStore();
-    if (!authStore.user) return;
+    if (!authStore.user) {
+      error.value = 'Utilisateur non authentifié';
+      return;
+    }
 
     loading.value = true;
     error.value = null;
@@ -38,8 +41,7 @@ export const useProjectStore = defineStore('project', () => {
     try {
       const q = query(
         collection(db, 'projects'),
-        where('userId', '==', authStore.user.uid),
-        orderBy('createdAt', 'desc')
+        where('userId', '==', authStore.user.uid)
       );
 
       unsubscribeProjects = onSnapshot(q, (snapshot) => {
@@ -47,16 +49,25 @@ export const useProjectStore = defineStore('project', () => {
           id: doc.id,
           ...doc.data()
         }));
+        
+        // Trier manuellement par date de création (du plus récent au plus ancien)
+        projects.value.sort((a, b) => {
+          const dateA = a.createdAt?.toMillis() || 0;
+          const dateB = b.createdAt?.toMillis() || 0;
+          return dateB - dateA;
+        });
+        
         loading.value = false;
+        error.value = null;
       }, (err) => {
-        error.value = 'Erreur lors du chargement des projets';
+        console.error('Erreur Firestore:', err);
+        error.value = 'Erreur lors du chargement des projets: ' + err.message;
         loading.value = false;
-        console.error(err);
       });
     } catch (err) {
-      error.value = 'Erreur lors du chargement des projets';
+      console.error('Erreur:', err);
+      error.value = 'Erreur lors du chargement des projets: ' + err.message;
       loading.value = false;
-      console.error(err);
     }
   };
 
@@ -68,15 +79,17 @@ export const useProjectStore = defineStore('project', () => {
     try {
       error.value = null;
       const docRef = await addDoc(collection(db, 'projects'), {
-        ...projectData,
+        name: projectData.name,
+        description: projectData.description || '',
+        color: projectData.color || '#6366f1',
         userId: authStore.user.uid,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
       return docRef.id;
     } catch (err) {
-      error.value = 'Erreur lors de la création du projet';
-      console.error(err);
+      console.error('Erreur création projet:', err);
+      error.value = 'Erreur lors de la création du projet: ' + err.message;
       throw err;
     }
   };
@@ -87,12 +100,14 @@ export const useProjectStore = defineStore('project', () => {
       error.value = null;
       const projectRef = doc(db, 'projects', projectId);
       await updateDoc(projectRef, {
-        ...projectData,
+        name: projectData.name,
+        description: projectData.description || '',
+        color: projectData.color || '#6366f1',
         updatedAt: serverTimestamp()
       });
     } catch (err) {
-      error.value = 'Erreur lors de la mise à jour du projet';
-      console.error(err);
+      console.error('Erreur mise à jour projet:', err);
+      error.value = 'Erreur lors de la mise à jour du projet: ' + err.message;
       throw err;
     }
   };
@@ -101,16 +116,21 @@ export const useProjectStore = defineStore('project', () => {
   const deleteProject = async (projectId) => {
     try {
       error.value = null;
+      
       // Supprimer d'abord toutes les tâches du projet
-      const tasksSnapshot = await getDocs(collection(db, 'projects', projectId, 'tasks'));
-      const deletePromises = tasksSnapshot.docs.map(taskDoc => deleteDoc(taskDoc.ref));
+      const tasksRef = collection(db, 'projects', projectId, 'tasks');
+      const tasksSnapshot = await getDocs(tasksRef);
+      
+      const deletePromises = tasksSnapshot.docs.map(taskDoc => 
+        deleteDoc(doc(db, 'projects', projectId, 'tasks', taskDoc.id))
+      );
       await Promise.all(deletePromises);
       
       // Puis supprimer le projet
       await deleteDoc(doc(db, 'projects', projectId));
     } catch (err) {
-      error.value = 'Erreur lors de la suppression du projet';
-      console.error(err);
+      console.error('Erreur suppression projet:', err);
+      error.value = 'Erreur lors de la suppression du projet: ' + err.message;
       throw err;
     }
   };
@@ -135,41 +155,51 @@ export const useProjectStore = defineStore('project', () => {
       
       loading.value = false;
     } catch (err) {
-      error.value = 'Erreur lors du chargement du projet';
+      console.error('Erreur chargement projet:', err);
+      error.value = 'Erreur lors du chargement du projet: ' + err.message;
       loading.value = false;
-      console.error(err);
       throw err;
     }
   };
 
   // Charger les tâches d'un projet en temps réel
   const loadTasks = (projectId) => {
-    if (!projectId) return;
+    if (!projectId) {
+      error.value = 'ID de projet manquant';
+      return;
+    }
 
     loading.value = true;
     error.value = null;
 
     try {
-      const q = query(
-        collection(db, 'projects', projectId, 'tasks'),
-        orderBy('createdAt', 'desc')
-      );
+      // Query simple sans orderBy pour éviter les problèmes d'index
+      const tasksRef = collection(db, 'projects', projectId, 'tasks');
 
-      unsubscribeTasks = onSnapshot(q, (snapshot) => {
+      unsubscribeTasks = onSnapshot(tasksRef, (snapshot) => {
         tasks.value = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         }));
+        
+        // Trier manuellement par date de création (du plus récent au plus ancien)
+        tasks.value.sort((a, b) => {
+          const dateA = a.createdAt?.toMillis() || 0;
+          const dateB = b.createdAt?.toMillis() || 0;
+          return dateB - dateA;
+        });
+        
         loading.value = false;
+        error.value = null;
       }, (err) => {
-        error.value = 'Erreur lors du chargement des tâches';
+        console.error('Erreur chargement tâches:', err);
+        error.value = 'Erreur lors du chargement des tâches: ' + err.message;
         loading.value = false;
-        console.error(err);
       });
     } catch (err) {
-      error.value = 'Erreur lors du chargement des tâches';
+      console.error('Erreur:', err);
+      error.value = 'Erreur lors du chargement des tâches: ' + err.message;
       loading.value = false;
-      console.error(err);
     }
   };
 
@@ -178,15 +208,17 @@ export const useProjectStore = defineStore('project', () => {
     try {
       error.value = null;
       const docRef = await addDoc(collection(db, 'projects', projectId, 'tasks'), {
-        ...taskData,
+        title: taskData.title,
+        description: taskData.description || '',
         status: taskData.status || 'todo',
+        deadline: taskData.deadline || null,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
       return docRef.id;
     } catch (err) {
-      error.value = 'Erreur lors de la création de la tâche';
-      console.error(err);
+      console.error('Erreur création tâche:', err);
+      error.value = 'Erreur lors de la création de la tâche: ' + err.message;
       throw err;
     }
   };
@@ -196,13 +228,20 @@ export const useProjectStore = defineStore('project', () => {
     try {
       error.value = null;
       const taskRef = doc(db, 'projects', projectId, 'tasks', taskId);
-      await updateDoc(taskRef, {
-        ...taskData,
+      
+      const updateData = {
         updatedAt: serverTimestamp()
-      });
+      };
+      
+      if (taskData.title !== undefined) updateData.title = taskData.title;
+      if (taskData.description !== undefined) updateData.description = taskData.description;
+      if (taskData.status !== undefined) updateData.status = taskData.status;
+      if (taskData.deadline !== undefined) updateData.deadline = taskData.deadline;
+      
+      await updateDoc(taskRef, updateData);
     } catch (err) {
-      error.value = 'Erreur lors de la mise à jour de la tâche';
-      console.error(err);
+      console.error('Erreur mise à jour tâche:', err);
+      error.value = 'Erreur lors de la mise à jour de la tâche: ' + err.message;
       throw err;
     }
   };
@@ -213,16 +252,22 @@ export const useProjectStore = defineStore('project', () => {
       error.value = null;
       await deleteDoc(doc(db, 'projects', projectId, 'tasks', taskId));
     } catch (err) {
-      error.value = 'Erreur lors de la suppression de la tâche';
-      console.error(err);
+      console.error('Erreur suppression tâche:', err);
+      error.value = 'Erreur lors de la suppression de la tâche: ' + err.message;
       throw err;
     }
   };
 
   // Nettoyer les listeners
   const cleanup = () => {
-    if (unsubscribeProjects) unsubscribeProjects();
-    if (unsubscribeTasks) unsubscribeTasks();
+    if (unsubscribeProjects) {
+      unsubscribeProjects();
+      unsubscribeProjects = null;
+    }
+    if (unsubscribeTasks) {
+      unsubscribeTasks();
+      unsubscribeTasks = null;
+    }
     projects.value = [];
     tasks.value = [];
     currentProject.value = null;

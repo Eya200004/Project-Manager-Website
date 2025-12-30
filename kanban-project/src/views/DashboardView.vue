@@ -196,8 +196,6 @@ const getInitials = (name) => {
       @close="closeModal"
       @success="closeModal"
     />
-
-    <!-- Delete Confirmation Modal -->
     <Transition name="modal">
       <div
         v-if="projectToDelete"

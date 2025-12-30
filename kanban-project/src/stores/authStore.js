@@ -1,4 +1,3 @@
-// src/stores/authStore.js
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { 
@@ -9,9 +8,7 @@ import {
   onAuthStateChanged 
 } from 'firebase/auth';
 import { auth, googleProvider } from '@/firebase/config';
-
 export const useAuthStore = defineStore('auth', () => {
-  // State
   const user = ref(null);
   const loading = ref(true);
   const error = ref(null);
@@ -46,7 +43,7 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   // Connexion avec Email/Password
-  const login = async (email, password) => {
+  const login = async (email, password) =>{
     try {
       error.value = null;
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -56,9 +53,8 @@ export const useAuthStore = defineStore('auth', () => {
       throw error.value;
     }
   };
-
-  // Connexion avec Google
-  const loginWithGoogle = async () => {
+  //connexion google
+  const loginWithGoogle = async () =>{
     try {
       error.value = null;
       const result = await signInWithPopup(auth, googleProvider);
@@ -68,8 +64,7 @@ export const useAuthStore = defineStore('auth', () => {
       throw error.value;
     }
   };
-
-  // Déconnexion
+  //déconnexion
   const logout = async () => {
     try {
       error.value = null;
@@ -80,8 +75,7 @@ export const useAuthStore = defineStore('auth', () => {
       throw error.value;
     }
   };
-
-  // Gestion des erreurs Firebase
+    //gestion des erreurs
   const handleAuthError = (err) => {
     const errorMessages = {
       'auth/invalid-email': 'Adresse email invalide',
@@ -95,23 +89,18 @@ export const useAuthStore = defineStore('auth', () => {
     };
     return errorMessages[err.code] || 'Une erreur est survenue';
   };
-
-  // Getters
   const isAuthenticated = () => !!user.value;
-
-  return {
+  return{
     // State
     user,
     loading,
     error,
-    
     // Actions
     initAuth,
     register,
     login,
     loginWithGoogle,
     logout,
-    
     // Getters
     isAuthenticated
   };
